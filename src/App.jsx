@@ -23,7 +23,7 @@ import {
   RefreshCw,
   CheckCircle,
   Clock,
-  Building2,
+  Building2, 
   Globe,
   Lock,
   User,
@@ -31,7 +31,15 @@ import {
   Ban,
   Key,
   AtSign,
-  UserPlus
+  UserPlus,
+  Plane, // New icon for Flights
+  ArrowRight,
+  Send,
+  CalendarCheck,
+  CalendarX,
+  PlaneTakeoff,
+  Clock3,
+  Ticket,
 } from 'lucide-react';
 
 // --- CHART IMPORTS ---
@@ -50,6 +58,7 @@ import {
   CartesianGrid, 
   Line 
 } from 'recharts';
+
 // --- Mock Data ---
 
 const INITIAL_PACKAGES = [
@@ -59,15 +68,6 @@ const INITIAL_PACKAGES = [
   { id: 4, title: 'Dubai Luxury Week', category: 'Luxury', price: 3000, days: 5, image: 'https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&w=600&q=80' },
 ];
 
-const INITIAL_BOOKINGS = [
-  // Added dates from previous months to make the Line Chart dynamic
-  { id: 'BK-7829', customer: 'Sarah Jenkins', package: 'Bali Paradise Escape', date: '2023-10-20', pax: 2, amount: 2400, status: 'Confirmed', packageId: 1 },
-  { id: 'BK-7830', customer: 'Michael Chen', package: 'Swiss Alps Adventure', date: '2023-11-05', pax: 1, amount: 2400, status: 'Pending', packageId: 2 },
-  { id: 'BK-7831', customer: 'Emma Watson', package: 'Kyoto Cultural Tour', date: '2023-11-25', pax: 4, amount: 7200, status: 'Confirmed', packageId: 3 },
-  { id: 'BK-7832', customer: 'Robert Doe', package: 'Dubai Luxury Week', date: '2023-12-10', pax: 2, amount: 6000, status: 'Cancelled', packageId: 4 },
-  { id: 'BK-7833', customer: 'Alice Brown', package: 'Bali Paradise Escape', date: '2023-10-01', pax: 3, amount: 3600, status: 'Confirmed', packageId: 1 },
-];
-
 const INITIAL_CUSTOMERS = [
   { id: 1, name: 'Sarah Jenkins', email: 'sarah.j@example.com', phone: '+1 555-0123', history: 3 },
   { id: 2, name: 'Michael Chen', email: 'm.chen@example.com', phone: '+1 555-0124', history: 1 },
@@ -75,21 +75,134 @@ const INITIAL_CUSTOMERS = [
   { id: 4, name: 'Robert Doe', email: 'rob.doe@example.com', phone: '+1 555-0199', history: 2 },
 ];
 
-// --- NEW EXPENSES MOCK DATA ---
+const INITIAL_SUPPLIERS = [
+    { id: 1, name: 'Air Asia Flights', contact: 'flights@airasia.com', service: 'Flights' },
+    { id: 2, name: 'The Great Hotel Group', contact: 'hotels@ghg.com', service: 'Accommodation' },
+    { id: 3, name: 'Local Transport Co.', contact: 'support@ltc.com', service: 'Ground Transport' },
+];
+
+const INITIAL_BOOKINGS = [
+  { id: 'BK-7829', customer: 'Sarah Jenkins', package: 'Bali Paradise Escape', date: '2023-10-20', pax: 2, amount: 2400, status: 'Confirmed', packageId: 1, supplierId: 2, supplierCost: 1000 },
+  { id: 'BK-7830', customer: 'Michael Chen', package: 'Swiss Alps Adventure', date: '2023-11-05', pax: 1, amount: 2400, status: 'Pending', packageId: 2, supplierId: 1, supplierCost: 1500 },
+  { id: 'BK-7831', customer: 'Emma Watson', package: 'Kyoto Cultural Tour', date: '2023-11-25', pax: 4, amount: 7200, status: 'Confirmed', packageId: 3, supplierId: 2, supplierCost: 3500 },
+  { id: 'BK-7832', customer: 'Robert Doe', package: 'Dubai Luxury Week', date: '2023-12-10', pax: 2, amount: 6000, status: 'Cancelled', packageId: 4, supplierId: 3, supplierCost: 0 },
+  { id: 'BK-7833', customer: 'Alice Brown', package: 'Bali Paradise Escape', date: '2023-10-01', pax: 3, amount: 3600, status: 'Confirmed', packageId: 1, supplierId: 1, supplierCost: 1500 },
+];
+
 const INITIAL_EXPENSES = [
     { id: 101, description: 'Marketing Campaign Q4', type: 'Marketing', amount: 2000, date: '2023-11-01' },
     { id: 102, description: 'Website Hosting Renewal', type: 'IT', amount: 350, date: '2023-11-20' },
     { id: 103, description: 'Office Supplies', type: 'General', amount: 150, date: '2023-10-15' },
 ];
 
+// --- NEW FLIGHTS MOCK DATA ---
+const INITIAL_FLIGHT_DATA = [
+    { id: 1001, airline: 'Air Global', flightNumber: 'AG-123', from: 'JFK', to: 'LAX', departure: '08:00', arrival: '11:30', duration: '5h 30m', price: 350, availableSeats: 50, class: 'Economy' },
+    { id: 1002, airline: 'Sky Connect', flightNumber: 'SC-456', from: 'JFK', to: 'LAX', departure: '14:00', arrival: '17:45', duration: '5h 45m', price: 820, availableSeats: 10, class: 'Business' },
+    { id: 1003, airline: 'Air Global', flightNumber: 'AG-789', from: 'LAX', to: 'JFK', departure: '19:00', arrival: '03:00', duration: '5h 00m', price: 300, availableSeats: 120, class: 'Economy' },
+    { id: 1004, airline: 'Star Flyer', flightNumber: 'SF-001', from: 'MIA', to: 'ORD', departure: '10:00', arrival: '12:30', duration: '2h 30m', price: 200, availableSeats: 5, class: 'Economy' },
+];
+
+const INITIAL_FLIGHT_BOOKINGS = [
+    { 
+        pnr: 'A2BCDE', passengerName: 'John Doe', flightId: 1001, date: '2025-12-15', status: 'Upcoming', 
+        details: { from: 'JFK', to: 'LAX', departure: '08:00', airline: 'Air Global', flightNumber: 'AG-123', class: 'Economy', seat: '15A', 
+            passenger: { fullName: 'John Doe', age: 35, gender: 'Male', passport: 'P1234567', email: 'john@example.com', phone: '+15551234' }
+        } 
+    },
+    { 
+        pnr: 'F3GHIJ', passengerName: 'Jane Smith', flightId: 1003, date: '2025-11-01', status: 'Completed', 
+        details: { from: 'LAX', to: 'JFK', departure: '19:00', airline: 'Air Global', flightNumber: 'AG-789', class: 'Economy', seat: '22B',
+            passenger: { fullName: 'Jane Smith', age: 28, gender: 'Female', passport: '', email: 'jane@example.com', phone: '+15555678' }
+        } 
+    },
+];
+// --- END NEW FLIGHTS MOCK DATA ---
+
+
+// --- Utility Functions ---
+
+// Mock PDF generation function using a new window
+const generateMockETicket = (booking, flight, passenger) => {
+    // Generate a simple random seat number for fun
+    const seatNumber = booking.details.seat || `${Math.floor(Math.random() * 30) + 1}${['A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 6)]}`;
+    
+    const ticketContent = `
+    ========================================================
+    ✈️ AM TOURS E-TICKET (FLIGHT CONFIRMATION) ✈️
+    ========================================================
+
+    PNR / BOOKING ID: ${booking.pnr}
+    STATUS: ${booking.status.toUpperCase()}
+    BOOKING DATE: ${new Date().toLocaleDateString()}
+    
+    TRAVEL AGENT CONTACT: +1 (555) 987-6543 | contact@amtours.com
+
+    --------------------------------------------------------
+    PASSENGER DETAILS
+    --------------------------------------------------------
+    Full Name: ${passenger.fullName}
+    Age / Gender: ${passenger.age} / ${passenger.gender}
+    Email: ${passenger.email}
+    Phone: ${passenger.phone}
+    Passport: ${passenger.passport || 'N/A (Check-in Required)'}
+    
+    --------------------------------------------------------
+    FLIGHT DETAILS
+    --------------------------------------------------------
+    Airline: ${flight.airline}
+    Flight: ${flight.flightNumber}
+    Route: ${flight.from} → ${flight.to}
+    Date: ${booking.date}
+    Class: ${flight.class}
+    
+    DEPARTURE: ${flight.departure} (${flight.from})
+    ARRIVAL: ${flight.arrival} (${flight.to})
+    Duration: ${flight.duration}
+
+    BOARDING PASS INFO:
+    Seat Number: ${seatNumber}
+    Gate: TBA (Check Airport Screens)
+
+    ========================================================
+    THANK YOU FOR BOOKING WITH AM TOURS.
+    Please bring valid photo ID.
+    ========================================================
+    `;
+
+    // Mock PDF generation by opening a new window with text
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(`
+        <html lang="en">
+            <head>
+                <title>E-Ticket: ${booking.pnr}</title>
+                <style>
+                    body { font-family: 'Courier New', Courier, monospace; white-space: pre; background: #fff; color: #333; padding: 20px; }
+                    pre { border: 2px solid #047857; padding: 20px; margin: 0; background: #f0fff4; }
+                </style>
+            </head>
+            <body>
+                <pre>${ticketContent}</pre>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="window.print()" style="padding: 10px 20px; background-color: #059669; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Ticket</button>
+                </div>
+            </body>
+        </html>
+    `);
+    newWindow.document.close();
+};
+
+
 // --- Components ---
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: <Home size={20} /> },
+    { id: 'flights', name: 'Flights', icon: <Plane size={20} /> }, // NEW FLIGHTS TAB
     { id: 'packages', name: 'Tour Packages', icon: <Map size={20} /> },
     { id: 'bookings', name: 'Bookings', icon: <FileText size={20} /> },
     { id: 'customers', name: 'Customers', icon: <Users size={20} /> },
+    { id: 'suppliers', name: 'Suppliers', icon: <Building2 size={20} /> }, 
     { id: 'finance', name: 'Finance', icon: <CreditCard size={20} /> },
     { id: 'settings', name: 'Settings', icon: <Settings size={20} /> },
   ];
@@ -659,7 +772,8 @@ const Packages = ({ packages, onAddPackage, onUpdatePackage, onDeletePackage }) 
   );
 };
 
-const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteBooking, onStatusToggle }) => {
+// UPDATED: Bookings component to handle suppliers
+const Bookings = ({ bookings, packages, suppliers, onAddBooking, onUpdateBooking, onDeleteBooking, onStatusToggle }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [editingBooking, setEditingBooking] = useState(null);
@@ -668,7 +782,9 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
     packageId: '',
     date: '',
     pax: 1,
-    status: 'Pending'
+    status: 'Pending',
+    supplierId: '', // NEW FIELD
+    supplierCost: 0 // NEW FIELD
   });
 
   useEffect(() => {
@@ -678,10 +794,20 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
             packageId: editingBooking.packageId || '',
             date: editingBooking.date,
             pax: editingBooking.pax,
-            status: editingBooking.status
+            status: editingBooking.status,
+            supplierId: editingBooking.supplierId || '', // Update for editing
+            supplierCost: editingBooking.supplierCost || 0 // Update for editing
         });
     } else {
-        setBookingForm({ customer: '', packageId: '', date: '', pax: 1, status: 'Pending' });
+        setBookingForm({ 
+          customer: '', 
+          packageId: '', 
+          date: '', 
+          pax: 1, 
+          status: 'Pending',
+          supplierId: '', // Default value
+          supplierCost: 0 // Default value
+        });
     }
   }, [editingBooking, isModalOpen]);
 
@@ -719,7 +845,9 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
       date: bookingForm.date,
       pax: parseInt(bookingForm.pax),
       amount: selectedPkg ? selectedPkg.price * parseInt(bookingForm.pax) : 0,
-      status: bookingForm.status
+      status: bookingForm.status,
+      supplierId: parseInt(bookingForm.supplierId) || null, // Ensure it's an integer or null
+      supplierCost: parseInt(bookingForm.supplierCost) || 0 // Ensure it's an integer
     };
 
     if (editingBooking) {
@@ -761,7 +889,7 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
         </div>
       )}
 
-      {/* Booking Form Modal */}
+      {/* Booking Form Modal (UPDATED with Supplier fields) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 m-4 animate-in fade-in zoom-in duration-200">
@@ -827,6 +955,38 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
                   />
                 </div>
               </div>
+              
+              {/* NEW SUPPLIER FIELDS */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Supplier</label>
+                  <select 
+                    name="supplierId"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    value={bookingForm.supplierId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">No Supplier Assigned</option>
+                    {suppliers.map(s => (
+                      <option key={s.id} value={s.id}>{s.name} ({s.service})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Supplier Cost ($)</label>
+                  <input 
+                    type="number" 
+                    name="supplierCost"
+                    min="0"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    value={bookingForm.supplierCost}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              {/* END NEW SUPPLIER FIELDS */}
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -886,12 +1046,16 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
               <th className="px-6 py-4 font-semibold text-gray-700">Travel Date</th>
               <th className="px-6 py-4 font-semibold text-gray-700">Pax</th>
               <th className="px-6 py-4 font-semibold text-gray-700 text-right">Amount</th>
+              <th className="px-6 py-4 font-semibold text-gray-700">Supplier</th> {/* NEW HEADER */}
+              <th className="px-6 py-4 font-semibold text-gray-700 text-right">Supplier Cost</th> {/* NEW HEADER */}
               <th className="px-6 py-4 font-semibold text-gray-700 text-center">Status</th>
               <th className="px-6 py-4 font-semibold text-gray-700 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking) => (
+            {bookings.map((booking) => {
+              const supplier = suppliers.find(s => s.id === booking.supplierId); // Find supplier
+              return (
               <tr key={booking.id} className="border-b hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-mono text-emerald-600 font-medium">{booking.id}</td>
                 <td className="px-6 py-4">
@@ -905,6 +1069,18 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
                 </td>
                 <td className="px-6 py-4">{booking.pax}</td>
                 <td className="px-6 py-4 text-right font-medium text-gray-900">${booking.amount}</td>
+                {/* NEW COLUMN: Supplier Name */}
+                <td className="px-6 py-4">
+                    {supplier ? (
+                      <div className="font-medium text-gray-900">{supplier.name}</div>
+                    ) : (
+                      <span className="text-gray-400 italic">N/A</span>
+                    )}
+                </td>
+                {/* NEW COLUMN: Supplier Cost */}
+                <td className="px-6 py-4 text-right font-medium text-red-600">
+                    ${(booking.supplierCost || 0).toLocaleString()}
+                </td>
                 <td className="px-6 py-4 text-center">
                    <span className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1
                     ${booking.status === 'Confirmed' ? 'bg-green-50 text-green-700 border-green-200' : 
@@ -941,7 +1117,8 @@ const Bookings = ({ bookings, packages, onAddBooking, onUpdateBooking, onDeleteB
                     </div>
                 </td>
               </tr>
-            ))}
+            )}
+            )}
           </tbody>
         </table>
       </div>
@@ -1179,7 +1356,246 @@ const Customers = ({ customers, onAddCustomer, onUpdateCustomer, onDeleteCustome
   );
 };
 
-// --- NEW FINANCE COMPONENT (with real data and expense function) ---
+
+// --- NEW SUPPLIERS COMPONENT (Manages suppliers and aggregates payments) ---
+const SuppliersComponent = ({ suppliers, bookings, onAddSupplier, onUpdateSupplier, onDeleteSupplier }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [supplierForm, setSupplierForm] = useState({
+    name: '',
+    contact: '',
+    service: '',
+  });
+
+  useEffect(() => {
+    if (editingSupplier) {
+        setSupplierForm({
+            name: editingSupplier.name,
+            contact: editingSupplier.contact,
+            service: editingSupplier.service
+        });
+    } else {
+        setSupplierForm({ name: '', contact: '', service: '' });
+    }
+  }, [editingSupplier, isModalOpen]);
+  
+  // Calculate total money given to each supplier from CONFIRMED bookings
+  const supplierPayments = bookings.reduce((acc, booking) => {
+      if (booking.status === 'Confirmed' && booking.supplierId && booking.supplierCost > 0) {
+          acc[booking.supplierId] = (acc[booking.supplierId] || 0) + booking.supplierCost;
+      }
+      return acc;
+  }, {});
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSupplierForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const openAddModal = () => {
+    setEditingSupplier(null);
+    setIsModalOpen(true);
+  }
+
+  const openEditModal = (supplier) => {
+    setEditingSupplier(supplier);
+    setIsModalOpen(true);
+  }
+
+  const confirmDelete = () => {
+    onDeleteSupplier(deleteId);
+    setDeleteId(null);
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const supplierData = {
+      name: supplierForm.name,
+      contact: supplierForm.contact,
+      service: supplierForm.service
+    };
+
+    if (editingSupplier) {
+        onUpdateSupplier({ ...editingSupplier, ...supplierData });
+    } else {
+        onAddSupplier(supplierData);
+    }
+    
+    setIsModalOpen(false);
+  };
+    
+  return (
+    <div className="p-8 bg-gray-50 min-h-screen">
+      
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl p-6 m-4 max-w-sm w-full transform scale-100">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="text-red-600" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
+              <p className="text-gray-600 mb-6">Are you sure you want to delete this supplier? This action cannot be undone.</p>
+              <div className="flex gap-3 w-full">
+                <button 
+                  onClick={() => setDeleteId(null)} 
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete} 
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Supplier Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 m-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">{editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Supplier Name</label>
+                <input 
+                  type="text" 
+                  name="name"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={supplierForm.name}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Local Hotel Chain"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                <input 
+                  type="email" 
+                  name="contact"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={supplierForm.contact}
+                  onChange={handleInputChange}
+                  placeholder="contact@supplier.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Service Provided</label>
+                <select 
+                  name="service"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={supplierForm.service}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Service...</option>
+                  <option value="Flights">Flights</option>
+                  <option value="Accommodation">Accommodation</option>
+                  <option value="Ground Transport">Ground Transport</option>
+                  <option value="Tours/Activities">Tours/Activities</option>
+                </select>
+              </div>
+
+              <div className="pt-4">
+                 <button 
+                  type="submit" 
+                  className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                >
+                  {editingSupplier ? 'Update Supplier' : 'Save Supplier'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <h2 className="text-xl font-bold text-gray-800">Suppliers List</h2>
+          <button 
+            onClick={openAddModal}
+            className="px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+          >
+            <Plus size={16} /> Add Supplier
+          </button>
+        </div>
+        
+        <table className="w-full text-left text-sm text-gray-600">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="px-6 py-4 font-semibold text-gray-700">Name</th>
+              <th className="px-6 py-4 font-semibold text-gray-700">Service</th>
+              <th className="px-6 py-4 font-semibold text-gray-700">Contact</th>
+              {/* This column tracks "how much money we gave" */}
+              <th className="px-6 py-4 font-semibold text-gray-700 text-right">Total Payments (Confirmed Bookings)</th> 
+              <th className="px-6 py-4 font-semibold text-gray-700 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {suppliers.map((supplier) => (
+              <tr key={supplier.id} className="border-b hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4">
+                  <div className="font-medium text-gray-900">{supplier.name}</div>
+                  <div className="text-xs text-gray-400">ID: #{supplier.id}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
+                    {supplier.service}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Mail size={14} className="text-gray-400" />
+                    <span>{supplier.contact}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-right font-bold text-red-600">
+                    ${(supplierPayments[supplier.id] || 0).toLocaleString()}
+                </td>
+                <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                         <button 
+                            onClick={() => openEditModal(supplier)}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit"
+                        >
+                            <Edit size={16} />
+                        </button>
+                        <button 
+                            onClick={() => setDeleteId(supplier.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+// --- END OF SUPPLIERS COMPONENT ---
+
+
 const FinanceComponent = ({ bookings, expenses, onAddExpense }) => {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [expenseForm, setExpenseForm] = useState({
@@ -1477,7 +1893,8 @@ const FinanceComponent = ({ bookings, expenses, onAddExpense }) => {
     </div>
   );
 };
-// --- END OF NEW FINANCE COMPONENT ---
+// --- END OF FINANCE COMPONENT ---
+
 
 // --- Settings Component Helpers & Data ---
 
@@ -1990,13 +2407,635 @@ const SettingsComponent = () => {
 };
 
 
+// --- NEW FLIGHTS MODULE COMPONENT ---
+
+const FlightsModule = ({ 
+    flightData, 
+    flightBookings, 
+    onAddFlight, 
+    onUpdateFlight, 
+    onDeleteFlight, 
+    onAddFlightBooking 
+}) => {
+    const [view, setView] = useState('search'); // 'search', 'results', 'history', 'admin'
+    const [searchForm, setSearchForm] = useState({ 
+        from: 'JFK', to: 'LAX', date: new Date().toISOString().substring(0, 10), 
+        passengers: 1, class: 'Economy', tripType: 'one-way' 
+    });
+    const [searchResults, setSearchResults] = useState([]);
+    const [isFlightModalOpen, setIsFlightModalOpen] = useState(false); // Modal for Add/Edit Flight (Admin)
+    const [isPassengerModalOpen, setIsPassengerModalOpen] = useState(false); // Modal for Passenger Details
+    const [editingFlight, setEditingFlight] = useState(null);
+    const [selectedFlight, setSelectedFlight] = useState(null);
+    const [passengerForm, setPassengerForm] = useState({
+        fullName: '', age: '', gender: 'Male', passport: '', email: '', phone: ''
+    });
+
+    // --- ADMIN HANDLERS (Add/Edit Flights) ---
+    const openAddFlightModal = () => {
+        setEditingFlight(null);
+        setIsFlightModalOpen(true);
+    };
+
+    const openEditFlightModal = (flight) => {
+        setEditingFlight(flight);
+        setIsFlightModalOpen(true);
+    };
+
+    const handleFlightFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditingFlight(prev => ({ 
+            ...prev, 
+            [name]: name === 'price' || name === 'availableSeats' ? parseInt(value) || '' : value 
+        }));
+    };
+
+    const handleSaveFlight = (e) => {
+        e.preventDefault();
+        const data = { ...editingFlight };
+
+        if (editingFlight && editingFlight.id) {
+            onUpdateFlight(data);
+        } else {
+            onAddFlight(data);
+        }
+        setIsFlightModalOpen(false);
+        setEditingFlight(null);
+    };
+
+    // --- SEARCH HANDLERS ---
+    const handleSearchChange = (e) => {
+        const { name, value } = e.target;
+        setSearchForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        // Simple mock search logic: filter by route
+        const results = flightData.filter(f => 
+            f.from === searchForm.from && f.to === searchForm.to
+        );
+        setSearchResults(results);
+        setView('results');
+    };
+
+    // --- BOOKING HANDLERS ---
+    const handleBookNow = (flight) => {
+        setSelectedFlight(flight);
+        setPassengerForm({ fullName: '', age: '', gender: 'Male', passport: '', email: '', phone: '' });
+        setIsPassengerModalOpen(true);
+    };
+
+    const handlePassengerFormChange = (e) => {
+        const { name, value } = e.target;
+        setPassengerForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleConfirmBooking = (e) => {
+        e.preventDefault();
+        if (!selectedFlight) return;
+
+        // 1. Generate PNR
+        const pnr = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        // 2. Prepare Booking Data
+        const newBooking = {
+            pnr: pnr,
+            passengerName: passengerForm.fullName,
+            flightId: selectedFlight.id,
+            date: searchForm.date, // Use the searched date
+            status: 'Upcoming',
+            details: {
+                from: selectedFlight.from,
+                to: selectedFlight.to,
+                departure: selectedFlight.departure,
+                airline: selectedFlight.airline,
+                flightNumber: selectedFlight.flightNumber,
+                class: selectedFlight.class,
+                seat: `${Math.floor(Math.random() * 30) + 1}${['A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 6)]}`, // Mock seat
+                passenger: { ...passengerForm, age: parseInt(passengerForm.age) }
+            }
+        };
+
+        // 3. Save Booking (updates state in App component)
+        onAddFlightBooking(newBooking);
+
+        // 4. Show Confirmation
+        alert(`Flight booked successfully! PNR: ${pnr}`);
+
+        // 5. Cleanup
+        setIsPassengerModalOpen(false);
+        setSearchResults([]); // Go back to search
+        setView('history'); // Directly move to history to show the new booking
+    };
+
+
+    // --- RENDERING SUB-VIEWS ---
+
+    // 1. Search Flights Page
+    const renderSearch = () => (
+        <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"><Search size={20} className='text-emerald-600'/> Search Available Flights</h2>
+            
+            <form onSubmit={handleSearchSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* From */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">From (Airport)</label>
+                        <input type="text" name="from" value={searchForm.from} onChange={handleSearchChange} required placeholder="e.g., JFK"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+                    {/* To */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">To (Airport)</label>
+                        <input type="text" name="to" value={searchForm.to} onChange={handleSearchChange} required placeholder="e.g., LAX"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+                    {/* Passengers */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Passengers</label>
+                        <input type="number" name="passengers" value={searchForm.passengers} onChange={handleSearchChange} min="1" required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+                    {/* Class */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                        <select name="class" value={searchForm.class} onChange={handleSearchChange} required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                        >
+                            <option>Economy</option>
+                            <option>Business</option>
+                            <option>First</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    {/* Date */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Departure Date</label>
+                        <input type="date" name="date" value={searchForm.date} onChange={handleSearchChange} required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+                    {/* Trip Type */}
+                    <div className='flex items-center gap-4 h-full'>
+                        <label className="flex items-center text-sm font-medium text-gray-700 mt-2">
+                            <input type="radio" name="tripType" value="one-way" checked={searchForm.tripType === 'one-way'} onChange={handleSearchChange} 
+                                className="h-4 w-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+                            />
+                            <span className="ml-2">One-way</span>
+                        </label>
+                        <label className="flex items-center text-sm font-medium text-gray-700 mt-2">
+                            <input type="radio" name="tripType" value="round-trip" checked={searchForm.tripType === 'round-trip'} onChange={handleSearchChange} 
+                                className="h-4 w-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+                            />
+                            <span className="ml-2">Round-trip</span>
+                        </label>
+                    </div>
+
+                    {/* Search Button */}
+                    <button type="submit" 
+                        className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Plane size={16}/> Search Flights
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+
+    // 2. Show Available Flights
+    const renderResults = () => (
+        <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                Available Flights: {searchForm.from} <ArrowRight size={20}/> {searchForm.to} ({searchForm.date})
+            </h2>
+
+            {searchResults.length === 0 ? (
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center">
+                    <AlertTriangle size={32} className="text-orange-500 mx-auto mb-3" />
+                    <p className="text-lg font-semibold text-gray-700">No flights found for this route.</p>
+                    <button onClick={() => setView('search')} className="mt-4 text-emerald-600 hover:underline">Modify Search</button>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {searchResults.map(flight => (
+                        <div key={flight.id} className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex justify-between items-center hover:shadow-lg transition-shadow">
+                            <div className="flex items-center space-x-6">
+                                {/* Times */}
+                                <div className="text-center">
+                                    <p className="text-2xl font-bold text-gray-900">{flight.departure}</p>
+                                    <p className="text-sm text-gray-500">{flight.from}</p>
+                                </div>
+                                <div className="text-center text-gray-400">
+                                    <Clock3 size={16} className='mx-auto mb-1'/>
+                                    <p className="text-xs font-medium">{flight.duration}</p>
+                                    <ArrowRight size={16} className='mx-auto mt-1'/>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-2xl font-bold text-gray-900">{flight.arrival}</p>
+                                    <p className="text-sm text-gray-500">{flight.to}</p>
+                                </div>
+                            </div>
+
+                            <div className="text-left flex-1 mx-8">
+                                <p className="text-lg font-semibold text-gray-800">{flight.airline} ({flight.flightNumber})</p>
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${flight.class === 'Economy' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                                    {flight.class}
+                                </span>
+                            </div>
+
+                            <div className="text-right">
+                                <p className="text-2xl font-bold text-emerald-600">${flight.price}</p>
+                                <p className="text-xs text-gray-500">Available: {flight.availableSeats} seats</p>
+                                <button 
+                                    onClick={() => handleBookNow(flight)}
+                                    className="mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
+                                    disabled={flight.availableSeats < searchForm.passengers}
+                                >
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            <button onClick={() => setView('search')} className="mt-6 text-sm text-gray-500 hover:underline flex items-center gap-1">
+                <Search size={14} /> New Search
+            </button>
+        </div>
+    );
+
+    // At the top of your component:
+const [historyFilter, setHistoryFilter] = useState("Upcoming");
+
+const renderHistory = () => {
+    const today = new Date().toISOString().substring(0, 10);
+
+    const upcoming = flightBookings.filter(
+        b => b.status === 'Upcoming' && b.date >= today
+    );
+
+    const completed = flightBookings.filter(
+        b => b.status === 'Completed' || (b.status === 'Upcoming' && b.date < today)
+    );
+
+    const cancelled = flightBookings.filter(
+        b => b.status === 'Cancelled'
+    );
+
+    const filterMap = {
+        'Upcoming': upcoming,
+        'Completed': completed,
+        'Cancelled': cancelled,
+    };
+
+    const currentBookings = filterMap[historyFilter];
+
+    return (
+        <div className="max-w-full mx-auto">
+            {/* Filter Buttons */}
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <CalendarCheck size={20} className="text-emerald-600" /> 
+                    Flight Booking History
+                </h2>
+
+                <div className="flex gap-3">
+                    {Object.keys(filterMap).map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setHistoryFilter(f)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                historyFilter === f
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+                            }`}
+                        >
+                            {f} ({filterMap[f].length})
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table className="w-full text-left text-sm text-gray-600">
+                    <thead className="bg-gray-50 border-b">
+                        <tr>
+                            <th className="px-6 py-3 font-semibold text-gray-700">PNR</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Passenger</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Flight</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Route & Date</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">Status</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700 text-right">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {currentBookings.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="text-center py-6 text-gray-500">
+                                    No {historyFilter.toLowerCase()} flights found.
+                                </td>
+                            </tr>
+                        ) : (
+                            currentBookings.map(booking => {
+                                const details = booking.details;
+                                const flight = flightData.find(f => f.id === booking.flightId) || {};
+
+                                return (
+                                    <tr key={booking.pnr} className="border-b hover:bg-gray-50 transition">
+                                        <td className="px-6 py-4 font-mono text-emerald-600 font-medium">
+                                            {booking.pnr}
+                                        </td>
+
+                                        <td className="px-6 py-4 font-medium text-gray-900">
+                                            {booking.passengerName}
+                                        </td>
+
+                                        <td className="px-6 py-4">
+                                            <div className="font-medium">{details.airline}</div>
+                                            <div className="text-xs text-gray-500">
+                                                {details.flightNumber} ({details.class})
+                                            </div>
+                                        </td>
+
+                                        <td className="px-6 py-4">
+                                            {details.from} → {details.to}
+                                            <div className="text-xs text-gray-500">
+                                                {booking.date} @ {details.departure}
+                                            </div>
+                                        </td>
+
+                                        <td className="px-6 py-4 text-center">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium border inline-flex items-center gap-1 ${
+                                                    booking.status === "Upcoming"
+                                                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                                                        : booking.status === "Completed"
+                                                        ? "bg-green-50 text-green-700 border-green-200"
+                                                        : "bg-red-50 text-red-700 border-red-200"
+                                                }`}
+                                            >
+                                                {booking.status}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() =>
+                                                    generateMockETicket(
+                                                        booking,
+                                                        { ...flight, date: booking.date },
+                                                        details.passenger
+                                                    )
+                                                }
+                                                className="px-3 py-2 text-sm bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 flex items-center justify-end gap-2 ml-auto"
+                                            >
+                                                <Ticket size={16} /> Download Ticket
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+    // 4. Admin Panel (Flights Management)
+    const renderAdmin = () => (
+        <div className="max-w-full mx-auto">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><PlaneTakeoff size={20} className='text-emerald-600'/> Flight Management (Admin)</h2>
+                <button 
+                    onClick={openAddFlightModal}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm flex items-center gap-2 hover:bg-emerald-700"
+                >
+                    <Plus size={16} /> Add New Flight
+                </button>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table className="w-full text-left text-sm text-gray-600">
+                    <thead className="bg-gray-50 border-b">
+                        <tr>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Airline / Flight</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Route</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700">Times / Duration</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700 text-right">Price</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700 text-center">Seats</th>
+                            <th className="px-6 py-3 font-semibold text-gray-700 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {flightData.map(flight => (
+                            <tr key={flight.id} className="border-b hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4">
+                                    <div className="font-medium text-gray-900">{flight.airline}</div>
+                                    <div className="text-xs text-gray-500">{flight.flightNumber} ({flight.class})</div>
+                                </td>
+                                <td className="px-6 py-4 font-medium">{flight.from} → {flight.to}</td>
+                                <td className="px-6 py-4">
+                                    <div className="text-gray-900">{flight.departure} - {flight.arrival}</div>
+                                    <div className="text-xs text-gray-500">Duration: {flight.duration}</div>
+                                </td>
+                                <td className="px-6 py-4 text-right font-bold text-emerald-600">${flight.price.toLocaleString()}</td>
+                                <td className="px-6 py-4 text-center font-medium">{flight.availableSeats}</td>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button 
+                                            onClick={() => openEditFlightModal(flight)}
+                                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Edit"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button 
+                                            onClick={() => onDeleteFlight(flight.id)}
+                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div className="mt-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">All Customer Flight Bookings</h3>
+                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table className="w-full text-left text-sm text-gray-600">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="px-6 py-3 font-semibold text-gray-700">PNR / Date</th>
+                                <th className="px-6 py-3 font-semibold text-gray-700">Passenger</th>
+                                <th className="px-6 py-3 font-semibold text-gray-700">Flight #</th>
+                                <th className="px-6 py-3 font-semibold text-gray-700">Route</th>
+                                <th className="px-6 py-3 font-semibold text-gray-700">Status</th>
+                            </tr>
+                        </thead>
+                         <tbody>
+                            {flightBookings.map(booking => (
+                                <tr key={booking.pnr} className="border-b hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 font-mono text-emerald-600">
+                                        {booking.pnr}
+                                        <div className="text-xs text-gray-500">{booking.date}</div>
+                                    </td>
+                                    <td className="px-6 py-4">{booking.passengerName}</td>
+                                    <td className="px-6 py-4">{booking.details.flightNumber} ({booking.details.class})</td>
+                                    <td className="px-6 py-4">{booking.details.from} → {booking.details.to}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${booking.status === 'Upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                                            {booking.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        </div>
+    );
+
+    // --- MODALS ---
+
+    // 1. Add/Edit Flight Modal (Admin)
+    const renderFlightModal = () => (
+        isFlightModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 m-4 animate-in fade-in zoom-in duration-200">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800">{editingFlight && editingFlight.id ? 'Edit Flight' : 'Add New Flight'}</h3>
+                        <button onClick={() => setIsFlightModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <X size={24} />
+                        </button>
+                    </div>
+                    
+                    <form onSubmit={handleSaveFlight} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Airline</label><input type="text" name="airline" value={editingFlight?.airline || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Flight Number</label><input type="text" name="flightNumber" value={editingFlight?.flightNumber || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">From</label><input type="text" name="from" value={editingFlight?.from || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">To</label><input type="text" name="to" value={editingFlight?.to || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Departure (HH:MM)</label><input type="text" name="departure" value={editingFlight?.departure || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Arrival (HH:MM)</label><input type="text" name="arrival" value={editingFlight?.arrival || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Duration</label><input type="text" name="duration" value={editingFlight?.duration || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Class</label><select name="class" value={editingFlight?.class || 'Economy'} onChange={handleFlightFormChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option>Economy</option><option>Business</option></select></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label><input type="number" name="price" value={editingFlight?.price || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Available Seats</label><input type="number" name="availableSeats" value={editingFlight?.availableSeats || ''} onChange={handleFlightFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" /></div>
+                        </div>
+
+                        <div className="pt-4">
+                            <button type="submit" className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+                                {editingFlight && editingFlight.id ? 'Update Flight' : 'Create Flight'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )
+    );
+
+    // 2. Passenger Details Modal
+    const renderPassengerModal = () => (
+        isPassengerModalOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 m-4 animate-in fade-in zoom-in duration-200">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2"><UserPlus size={20}/> Passenger Details for Flight {selectedFlight.flightNumber}</h3>
+                        <button onClick={() => setIsPassengerModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <X size={24} />
+                        </button>
+                    </div>
+                    
+                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                        <p className="font-semibold text-blue-700">Flight: {selectedFlight.airline} {selectedFlight.flightNumber} | {selectedFlight.from} → {selectedFlight.to}</p>
+                        <p className="text-blue-600">Total Price: <span className='font-bold'>${selectedFlight.price * searchForm.passengers}</span> (for {searchForm.passengers} pax)</p>
+                    </div>
+
+                    <form onSubmit={handleConfirmBooking} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" name="fullName" value={passengerForm.fullName} onChange={handlePassengerFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="John Doe" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Age</label><input type="number" name="age" value={passengerForm.age} onChange={handlePassengerFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" min="1" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Gender</label><select name="gender" value={passengerForm.gender} onChange={handlePassengerFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"><option>Male</option><option>Female</option><option>Other</option></select></div>
+                            <div><label className="block text-sm font-medium text-gray-700 mb-1">Passport Number (Optional)</label><input type="text" name="passport" value={passengerForm.passport} onChange={handlePassengerFormChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="A1234567" /></div>
+                            <div className='col-span-2'><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" name="email" value={passengerForm.email} onChange={handlePassengerFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="email@example.com" /></div>
+                            <div className='col-span-2'><label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label><input type="tel" name="phone" value={passengerForm.phone} onChange={handlePassengerFormChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="+1555..." /></div>
+                        </div>
+
+                        <div className="pt-4">
+                            <button type="submit" className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+                                <Check size={16} className="inline mr-2"/> Confirm Booking (No Payment Required)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )
+    );
+
+    return (
+        <div className="p-8 bg-gray-50 min-h-screen">
+            {renderFlightModal()}
+            {renderPassengerModal()}
+
+            <div className="flex justify-start items-center gap-4 mb-8 border-b pb-4">
+                <button 
+                    onClick={() => { setView('search'); setSearchResults([]); }}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 ${view === 'search' || view === 'results' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                >
+                    <Search size={16}/> Search & Book
+                </button>
+                <button 
+                    onClick={() => setView('history')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 ${view === 'history' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                >
+                    <FileText size={16}/> Booking History
+                </button>
+                <button 
+                    onClick={() => setView('admin')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 ${view === 'admin' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`}
+                >
+                    <Settings size={16}/> Admin Panel
+                </button>
+            </div>
+
+            {view === 'search' && renderSearch()}
+            {view === 'results' && renderResults()}
+            {view === 'history' && renderHistory()}
+            {view === 'admin' && renderAdmin()}
+
+        </div>
+    );
+};
+// --- END NEW FLIGHTS MODULE COMPONENT ---
+
+
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
   const [customers, setCustomers] = useState(INITIAL_CUSTOMERS);
   const [packages, setPackages] = useState(INITIAL_PACKAGES);
-  // --- NEW STATE FOR EXPENSES ---
+  const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS); 
   const [expenses, setExpenses] = useState(INITIAL_EXPENSES);
+  // --- NEW FLIGHTS STATE ---
+  const [flightData, setFlightData] = useState(INITIAL_FLIGHT_DATA);
+  const [flightBookings, setFlightBookings] = useState(INITIAL_FLIGHT_BOOKINGS);
+  // --- END NEW FLIGHTS STATE ---
 
   // --- Booking Handlers ---
   const handleAddBooking = (newBookingData) => {
@@ -2026,7 +3065,7 @@ const App = () => {
     }));
   };
 
-  // --- Customer Handlers ---
+  // --- Customer Handlers (No change) ---
   const handleAddCustomer = (newCustomerData) => {
     // Generate a unique ID to avoid collisions that break edit/delete
     const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
@@ -2045,7 +3084,7 @@ const App = () => {
     setCustomers(prev => prev.filter(c => c.id !== id));
   };
 
-  // --- Package Handlers ---
+  // --- Package Handlers (No change) ---
   const handleAddPackage = (newPackageData) => {
     const newId = packages.length > 0 ? Math.max(...packages.map(p => p.id)) + 1 : 1;
     const newPkg = {
@@ -2063,7 +3102,7 @@ const App = () => {
     setPackages(prev => prev.filter(p => p.id !== id));
   };
 
-  // --- EXPENSE HANDLER ---
+  // --- EXPENSE HANDLER (No change) ---
   const handleAddExpense = (newExpenseData) => {
     const newId = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 101;
     const newExpense = {
@@ -2073,12 +3112,72 @@ const App = () => {
     };
     setExpenses(prev => [...prev, newExpense]);
   };
+
+  // --- SUPPLIER HANDLERS ---
+  const handleAddSupplier = (newSupplierData) => {
+    const newId = suppliers.length > 0 ? Math.max(...suppliers.map(s => s.id)) + 1 : 1;
+    const newSupplier = {
+      id: newId,
+      ...newSupplierData
+    };
+    setSuppliers(prev => [...prev, newSupplier]);
+  };
+
+  const handleUpdateSupplier = (updatedSupplier) => {
+    setSuppliers(prev => prev.map(s => s.id === updatedSupplier.id ? updatedSupplier : s));
+  };
+
+  const handleDeleteSupplier = (id) => {
+    setSuppliers(prev => prev.filter(s => s.id !== id));
+  };
+  
+  // --- NEW FLIGHTS HANDLERS ---
+  const handleAddFlight = (newFlightData) => {
+    const newId = flightData.length > 0 ? Math.max(...flightData.map(f => f.id)) + 1 : 1000;
+    const newFlight = {
+        id: newId,
+        ...newFlightData
+    };
+    setFlightData(prev => [...prev, newFlight]);
+  };
+
+  const handleUpdateFlight = (updatedFlight) => {
+    setFlightData(prev => prev.map(f => f.id === updatedFlight.id ? updatedFlight : f));
+  };
+
+  const handleDeleteFlight = (id) => {
+    setFlightData(prev => prev.filter(f => f.id !== id));
+    // Also remove any bookings associated with this flight
+    setFlightBookings(prev => prev.filter(b => b.flightId !== id));
+  };
+
+  const handleAddFlightBooking = (newBooking) => {
+    // 1. Add new booking
+    setFlightBookings(prev => [newBooking, ...prev]);
+
+    // 2. Decrement available seats (Admin function)
+    setFlightData(prev => prev.map(f => {
+        if (f.id === newBooking.flightId) {
+            return { ...f, availableSeats: f.availableSeats - newBooking.details.passenger.passengers || 1 };
+        }
+        return f;
+    }));
+  };
+  // --- END NEW FLIGHTS HANDLERS ---
   
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        // UPDATED: Pass packages prop to Dashboard
         return <Dashboard bookings={bookings} setActiveTab={setActiveTab} packages={packages} />;
+      case 'flights':
+        return <FlightsModule
+            flightData={flightData}
+            flightBookings={flightBookings}
+            onAddFlight={handleAddFlight}
+            onUpdateFlight={handleUpdateFlight}
+            onDeleteFlight={handleDeleteFlight}
+            onAddFlightBooking={handleAddFlightBooking}
+        />;
       case 'packages':
         return <Packages 
             packages={packages} 
@@ -2090,6 +3189,7 @@ const App = () => {
         return <Bookings 
           bookings={bookings} 
           packages={packages} 
+          suppliers={suppliers} 
           onAddBooking={handleAddBooking} 
           onUpdateBooking={handleUpdateBooking}
           onDeleteBooking={handleDeleteBooking}
@@ -2102,8 +3202,15 @@ const App = () => {
             onUpdateCustomer={handleUpdateCustomer}
             onDeleteCustomer={handleDeleteCustomer}
         />;
+      case 'suppliers': 
+        return <SuppliersComponent
+            suppliers={suppliers} 
+            bookings={bookings}
+            onAddSupplier={handleAddSupplier} 
+            onUpdateSupplier={handleUpdateSupplier}
+            onDeleteSupplier={handleDeleteSupplier}
+        />;
       case 'finance':
-        // UPDATED: Pass bookings, expenses, and the new handler to FinanceComponent
         return <FinanceComponent 
             bookings={bookings} 
             expenses={expenses} 
