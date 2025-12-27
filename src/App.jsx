@@ -35,8 +35,8 @@ const INITIAL_TRANSACTIONS = [
 ];
 
 const CATEGORIES = {
-  income: ['Salary', 'Freelance', 'Investments', 'Sales', 'Other'],
-  expense: ['Rent', 'Utilities', 'Groceries', 'Transport', 'Entertainment', 'Equipment', 'Software', 'Other']
+  income: ['Salary', 'Freelance', 'agency', 'Other'],
+  expense: ['Subscriptions', 'Food', 'Transport', 'Entertainment', 'Items / Shopping', 'Other']
 };
 
 const formatCurrency = (amount) => {
@@ -693,7 +693,7 @@ onClick={() => deleteTransaction(txn.id, txn.type)}
             <DollarSign className="text-white w-5 h-5" />
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400">
-            FinTrack
+            updream
           </span>
         </div>
         
